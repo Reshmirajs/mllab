@@ -1,0 +1,116 @@
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.neural_network import MLPClassifier
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, classification_report
+import matplotlib.pyplot as plt
+import time
+
+df = pd.read_csv("/home/backup/ml_datasets/mnist.csv")
+print(df)
+print(df.info())
+print(df.isnull().sum())
+print(df.shape)
+
+x = df.drop("class", axis=1)[:20000]
+y = df["class"][:20000]
+
+x_train, x_test, y_train, y_test = train_test_split(
+    x, y, test_size=0.2, random_state=42
+)
+training_time = []
+
+# Sigmoid activation
+sig_model = MLPClassifier(
+    hidden_layer_sizes=(128, 64), activation="logistic",
+    solver="adam", max_iter=1000, random_state=42
+)
+start_time = time.time()
+sig_model.fit(x_train[:5000], y_train[:5000])
+training_time.append(time.time() - start_time)
+sig_pred = sig_model.predict(x_test[:2000])
+
+print("Sigmoid Activation")
+print("Accuracy:", accuracy_score(y_test[:2000], sig_pred))
+print("Precision:", precision_score(y_test[:2000], sig_pred, average="macro"))
+print("Recall:", recall_score(y_test[:2000], sig_pred, average="macro"))
+print("F1 Score:", f1_score(y_test[:2000], sig_pred, average="macro"))
+print("Confusion Matrix\\n", confusion_matrix(y_test[:2000], sig_pred))
+print("Classification Report\\n", classification_report(y_test[:2000], sig_pred))
+
+# ReLU activation
+relu_model = MLPClassifier(
+    hidden_layer_sizes=(128, 64), activation="relu",
+    solver="adam", max_iter=1000, random_state=42
+)
+start_time = time.time()
+relu_model.fit(x_train[:5000], y_train[:5000])
+training_time.append(time.time() - start_time)
+relu_pred = relu_model.predict(x_test[:2000])
+
+print("ReLU Activation")
+print("Accuracy:", accuracy_score(y_test[:2000], relu_pred))
+print("Precision:", precision_score(y_test[:2000], relu_pred, average="macro"))
+print("Recall:", recall_score(y_test[:2000], relu_pred, average="macro"))
+print("F1 Score:", f1_score(y_test[:2000], relu_pred, average="macro"))
+print("Confusion Matrix\\n", confusion_matrix(y_test[:2000], relu_pred))
+print("Classification Report\\n", classification_report(y_test[:2000], relu_pred))
+
+# Tanh activation
+tanh_model = MLPClassifier(
+    hidden_layer_sizes=(128, 64), activation="tanh",
+    solver="adam", max_iter=1000, random_state=42
+)
+start_time = time.time()
+tanh_model.fit(x_train[:5000], y_train[:5000])
+training_time.append(time.time() - start_time)
+tanh_pred = tanh_model.predict(x_test[:2000])
+
+print("Tanh Activation")
+print("Accuracy:", accuracy_score(y_test[:2000], tanh_pred))
+print("Precision:", precision_score(y_test[:2000], tanh_pred, average="macro"))
+print("Recall:", recall_score(y_test[:2000], tanh_pred, average="macro"))
+print("F1 Score:", f1_score(y_test[:2000], tanh_pred, average="macro"))
+print("Confusion Matrix\\n", confusion_matrix(y_test[:2000], tanh_pred))
+print("Classification Report\\n", classification_report(y_test[:2000], tanh_pred))
+
+# Compare convergence using loss curves
+plt.figure(figsize=(8, 5))
+plt.plot(sig_model.loss_curve_, marker="o", label="Sigmoid", linewidth=2)
+plt.plot(relu_model.loss_curve_, marker="o", label="ReLU", linewidth=2)
+plt.plot(tanh_model.loss_curve_, marker="o", label="Tanh", linewidth=2)
+plt.xlabel("Iteration")
+plt.ylabel("Loss")
+plt.title("Convergence Comparison")
+plt.legend()
+plt.grid()
+plt.show()
+
+# Compare training time
+activations = ["Sigmoid", "ReLU", "Tanh"]
+print("Training Times")
+print("Sigmoid Activation:", round(training_time[0], 3))
+print("ReLU Activation:", round(training_time[1], 3))
+print("Tanh Activation:", round(training_time[2], 3))
+
+plt.figure(figsize=(10, 5))
+plt.plot(activations, training_time, marker="o")
+plt.xlabel("Activation Function")
+plt.ylabel("Training Time")
+plt.title("Activation vs Training Time")
+plt.grid()
+plt.show()
+
+# Compare accuracy
+accuracy = [
+    accuracy_score(y_test[:2000], sig_pred),
+    accuracy_score(y_test[:2000], relu_pred),
+    accuracy_score(y_test[:2000], tanh_pred)
+]
+plt.figure(figsize=(8, 5))
+plt.plot(activations, accuracy, marker="o")
+plt.xlabel("Activation Function")
+plt.ylabel("Accuracy")
+plt.title("Activation vs Accuracy")
+plt.grid()
+plt.show()

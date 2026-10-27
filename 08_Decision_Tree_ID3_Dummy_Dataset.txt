@@ -1,0 +1,35 @@
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
+from sklearn.tree import DecisionTreeClassifier, plot_tree
+import matplotlib.pyplot as plt
+
+data = {
+    "Outlook": ["Rainy", "Rainy", "Overcast", "Sunny", "Sunny", "Sunny", "Overcast", "Rainy", "Rainy", "Sunny", "Rainy", "Overcast", "Overcast", "Sunny"],
+    "Temperature": ["Hot", "Hot", "Hot", "Mild", "Cool", "Cool", "Cool", "Mild", "Cool", "Mild", "Mild", "Mild", "Hot", "Mild"],
+    "Humidity": ["High", "High", "High", "High", "Normal", "Normal", "Normal", "High", "Normal", "Normal", "Normal", "High", "Normal", "High"],
+    "Windy": ["False", "True", "False", "False", "False", "True", "True", "False", "False", "False", "True", "True", "False", "True"],
+    "Play": ["Yes", "No", "Yes", "No", "Yes", "No", "Yes", "No", "Yes", "Yes", "Yes", "Yes", "Yes", "No"],
+}
+
+df = pd.DataFrame(data)
+print(df.head())
+
+le = LabelEncoder()
+for col in df.columns:
+    df[col] = le.fit_transform(df[col])
+
+X = df.drop("Play", axis=1)
+y = df["Play"]
+
+model = DecisionTreeClassifier(criterion="entropy")
+model.fit(X, y)
+
+plt.figure(figsize=(10, 8))
+plot_tree(
+    model,
+    feature_names=X.columns,
+    class_names=["NO", "YES"],
+    filled=True,
+)
+plt.title("Decision Tree using ID3")
+plt.show()

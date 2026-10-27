@@ -1,0 +1,84 @@
+#import libraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression 
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import  (accuracy_score, confusion_matrix,precision_score,
+                              recall_score,f1_score,classification_report)
+
+
+df=pd.read_csv('/home/backup/ml_datasets/pima_indians_diabetes.csv');
+print(df.head())
+
+#Check for missing values
+print(df.isnull().sum())
+
+df.head()
+
+df['class']=df['class'].map({'tested_positive':1,'tested_negative':0})
+X=df.drop('class',axis=1)
+y=df['class']
+
+X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.2,random_state=42)
+
+print(f"Training set size X: {X_train.shape[0]}")
+print(f"Testing set size X: {X_test.shape[0]}")
+print(f"Training set size y: {y_train.shape[0]}")
+print(f"Testing set size y: {y_test.shape[0]}")
+
+model1=LogisticRegression(max_iter=1000)
+model1.fit(X_train,y_train)
+y_pred1=model1.predict(X_test)
+
+predictions=pd.DataFrame({'Actual':y_test,'Predicted':y_pred1})
+print(predictions.head(20))
+
+print("\n...Logistic Regression Without Feature Scaling...\n")
+print(f"Accuracy:{accuracy_score(y_test,y_pred1):.4f}")
+print(f"Precision:{precision_score(y_test,y_pred1):.4f}")
+print(f"Recall:{recall_score(y_test,y_pred1):.4f}")
+print(f"F1:{f1_score(y_test,y_pred1):.4f}")
+
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred1))
+print("\nconfusion_matrix:")
+print(confusion_matrix(y_test, y_pred1))
+
+scalar=StandardScaler()
+
+X_train_scaled=scalar.fit_transform(X_train)
+X_test_scaled=scalar.transform(X_test)
+#print("Mean/std used for scaling:", scalar.mean_,scalar.scale_)
+
+model2=LogisticRegression(max_iter=1000)
+model2.fit(X_train_scaled,y_train)
+y_pred2=model2.predict(X_test_scaled)
+
+predictions=pd.DataFrame({'Actual':y_test,'Predicted':y_pred2})
+print(predictions.head(20))
+
+print("\n...Logistic Regression With Feature Scaling...\n")
+print(f"Accuracy:{accuracy_score(y_test,y_pred2):.4f}")
+print(f"Precision:{precision_score(y_test,y_pred2):.4f}")
+print(f"Recall:{recall_score(y_test,y_pred2):.4f}")
+print(f"F1:{f1_score(y_test,y_pred2):.4f}")
+
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred2))
+print("\nconfusion_matrix:")
+print(confusion_matrix(y_test, y_pred2))
+
+print("Comparison")
+print("========================================================")
+
+results=pd.DataFrame({
+    "Model":["Logistic Regression Without Feature Scaling","Logistic Regression With Feature Scaling"],
+    "Accuracy":[
+        accuracy_score(y_test,y_pred1),
+        accuracy_score(y_test,y_pred2)
+    ]
+})
+
+print(results)

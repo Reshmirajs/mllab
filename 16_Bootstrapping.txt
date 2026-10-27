@@ -1,0 +1,48 @@
+import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score, f1_score
+from sklearn.model_selection import KFold, cross_val_score
+
+iris = load_iris()
+X = iris.data
+y = iris.target
+print("Dataset shape:", X.shape)
+
+np.random.seed(42)
+n_iterations = 10
+bootstrap_accuracy = []
+bootstrap_f1 = []
+
+for i in range(n_iterations):
+    indices = np.random.choice(len(X), size=len(X), replace=True)
+    X_train = X[indices]
+    y_train = y[indices]
+    test_indices = list(set(range(len(X))) - set(indices))
+    if len(test_indices) == 0:
+        continue
+
+    X_test = X[test_indices]
+    y_test = y[test_indices]
+    model = DecisionTreeClassifier(random_state=42)
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+
+    accuracy = accuracy_score(y_test, y_pred)
+    f1 = f1_score(y_test, y_pred, average="weighted")
+    bootstrap_accuracy.append(accuracy)
+    bootstrap_f1.append(f1)
+
+    print("\nBootstrapping Results")
+    print("-----------------------------------")
+    print("Average Accuracy:", round(np.mean(bootstrap_accuracy), 3))
+    print("Average F1-score:", round(np.mean(bootstrap_f1), 3))
+
+kf = KFold(n_splits=5, shuffle=True, random_state=42)
+model = DecisionTreeClassifier(random_state=42)
+accuracy_scores = cross_val_score(model, X, y, cv=kf, scoring="accuracy")
+f1_scores = cross_val_score(model, X, y, cv=kf, scoring="f1_weighted")
+print("\n5-Fold Cross-Validation Results")
+print("-----------------------------------")
+print("Average Accuracy:", round(np.mean(accuracy_scores), 3))
+print("Average F1-score:", round(np.mean(f1_scores), 3))

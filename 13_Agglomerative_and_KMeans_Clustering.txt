@@ -1,0 +1,39 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans, AgglomerativeClustering
+from sklearn.metrics import silhouette_score
+
+df = pd.read_csv("/home/backup/ml_datasets/Mall_Customers.csv")
+print(df.head())
+print(df.isnull().sum())
+
+X = df[["Age", "Annual Income (k$)"]]
+print(X.head())
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+kmeans = KMeans(n_clusters=5, random_state=42, n_init=10)
+kmeans_labels = kmeans.fit_predict(X_scaled)
+kmeans_score = silhouette_score(X_scaled, kmeans_labels)
+print("\nK-Means Silhouette Score:", round(kmeans_score, 3))
+
+hierarchical = AgglomerativeClustering(n_clusters=5, linkage="ward")
+hierarchical_labels = hierarchical.fit_predict(X_scaled)
+hierarchical_score = silhouette_score(X_scaled, hierarchical_labels)
+print("Hierarchical Silhouette Score:", round(hierarchical_score, 3))
+
+plt.figure(figsize=(12, 5))
+plt.subplot(1, 2, 1)
+plt.scatter(X["Age"], X["Annual Income (k$)"], c=kmeans_labels, cmap="viridis")
+plt.title("K-Means Clustering")
+plt.xlabel("Age")
+plt.ylabel("Annual Income (k$)")
+
+plt.subplot(1, 2, 2)
+plt.scatter(X["Age"], X["Annual Income (k$)"], c=hierarchical_labels, cmap="viridis")
+plt.title("Agglomerative Clustering")
+plt.xlabel("Age")
+plt.ylabel("Annual Income (k$)")
+plt.show()
